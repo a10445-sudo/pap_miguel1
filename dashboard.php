@@ -1,0 +1,32 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: index.php?msg=' . urlencode('Por favor entre para aceder.'));
+    exit;
+}
+$name = htmlspecialchars($_SESSION['user_name']);
+$role = $_SESSION['user_role'];
+?>
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - PAP</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Bem-vindo, <?php echo $name; ?>!</h1>
+    <p>Tipo: <strong><?php echo ($role === 'professor') ? 'Professor' : 'Funcionário'; ?></strong></p>
+
+    <?php if ($role === 'funcionario'): ?>
+      <p><a class="button" href="funcionario.php">Aceder ao Painel de Funcionário</a></p>
+    <?php endif; ?>
+
+    <p>Aqui poderia estar o painel com funcionalidades distintas por papel.</p>
+
+    <p><a href="logout.php">Terminar sessão</a></p>
+  </main>
+</body>
+</html>
