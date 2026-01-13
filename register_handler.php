@@ -7,7 +7,7 @@ $name = trim($_POST['name'] ?? '');
 $password = $_POST['password'] ?? '';
 $role = $_POST['role'] ?? '';
 
-if (!$nrprocesso || !ctype_digit($nrprocesso) || !$name || !$password || !in_array($role, ['funcionario','professor'])) {
+if (!$nrprocesso || !ctype_digit($nrprocesso) || !$name || !$password || !in_array($role, ['funcionario','professor','administrador'])) {
     header('Location: register.php?msg=' . urlencode('Por favor preencha todos os campos corretamente.'));
     exit;
 }

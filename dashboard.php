@@ -18,13 +18,13 @@ $role = $_SESSION['user_role'];
 <body>
   <main class="container">
     <h1>Bem-vindo, <?php echo $name; ?>!</h1>
-    <p>Tipo: <strong><?php echo ($role === 'professor') ? 'Professor' : 'Funcionário'; ?></strong></p>
+    <p>Tipo: <strong><?php echo ($role === 'professor') ? 'Professor' : (($role === 'administrador') ? 'Administrador' : 'Funcionário'); ?></strong></p>
 
     <?php if ($role === 'funcionario'): ?>
       <p><a class="button" href="funcionario.php">Aceder ao Painel de Funcionário</a></p>
+    <?php elseif ($role === 'administrador'): ?>
+      <p><a class="button" href="administrador.php">Aceder ao Painel de Administrador</a></p>
     <?php endif; ?>
-
-    <p>Aqui poderia estar o painel com funcionalidades distintas por papel.</p>
 
     <p><a href="logout.php">Terminar sessão</a></p>
   </main>

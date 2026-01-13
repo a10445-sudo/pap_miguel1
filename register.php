@@ -35,6 +35,7 @@ $flash = isset($_GET['msg']) ? htmlspecialchars($_GET['msg']) : '';
       <select id="role" name="role" required>
         <option value="funcionario">Funcionário</option>
         <option value="professor">Professor</option>
+        <option value="administrador">Administrador</option>
       </select>
 
       <button type="submit">Registar</button>

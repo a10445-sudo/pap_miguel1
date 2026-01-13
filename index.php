@@ -31,7 +31,7 @@ $flash = isset($_GET['msg']) ? htmlspecialchars($_GET['msg']) : '';
       <button type="submit">Entrar</button>
     </form>
 
-    <p>Não tem conta? <a href="register.php">Registe-se como Funcionário ou Professor</a></p>
+    <p>Não tem conta? <a href="register.php">Registe-se como Funcionário, Professor ou Administrador</a></p>
   </main>
 </body>
 </html>
