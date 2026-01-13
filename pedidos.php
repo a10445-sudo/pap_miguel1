@@ -14,6 +14,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
+    requester_id INT NOT NULL,
     status VARCHAR(40) NOT NULL DEFAULT 'pendente',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");

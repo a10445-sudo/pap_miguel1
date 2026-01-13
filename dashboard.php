@@ -24,6 +24,8 @@ $role = $_SESSION['user_role'];
       <p><a class="button" href="funcionario.php">Aceder ao Painel de Funcionário</a></p>
     <?php elseif ($role === 'administrador'): ?>
       <p><a class="button" href="administrador.php">Aceder ao Painel de Administrador</a></p>
+    <?php elseif ($role === 'professor'): ?>
+      <p><a class="button" href="professor.php">Aceder ao Painel de Professor</a></p>
     <?php endif; ?>
 
     <p><a href="logout.php">Terminar sessão</a></p>
