@@ -4,7 +4,7 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php?msg=' . urlencode('Por favor entre para aceder.'));
     exit;
 }
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'professor') {
+if (!isset($_SESSION['user_role']) || trim($_SESSION['user_role']) !== 'professor') {
     header('Location: dashboard.php?msg=' . urlencode('Acesso negado.'));
     exit;
 }
@@ -40,7 +40,7 @@ $products = $stmt->fetchAll();
 
 // Get user's orders
 $stmt = $pdo->prepare('SELECT * FROM orders WHERE requester_id = ? ORDER BY created_at DESC');
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([(int)$_SESSION['user_id']]);
 $orders = $stmt->fetchAll();
 
 $name = htmlspecialchars($_SESSION['user_name']);
@@ -123,7 +123,6 @@ $name = htmlspecialchars($_SESSION['user_name']);
         </tbody>
       </table>
     <?php endif; ?>
-
     <p style="margin-top:18px"><a href="dashboard.php">Voltar ao Dashboard</a> · <a href="logout.php">Terminar sessão</a></p>
   </main>
 </body>

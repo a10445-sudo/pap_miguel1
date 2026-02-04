@@ -2,7 +2,7 @@
 session_start();
 require_once 'db.php';
 
-$nrprocesso = trim($_POST['nrprocesso'] ?? '');
+$nrprocesso = (int)trim($_POST['nrprocesso'] ?? '');
 $password = $_POST['password'] ?? '';
 
 if (!$nrprocesso || !$password) {
