@@ -4,8 +4,8 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php?msg=' . urlencode('Por favor entre para aceder.'));
     exit;
 }
-if (!isset($_SESSION['user_role']) || trim($_SESSION['user_role']) !== 'professor') {
-    header('Location: dashboard.php?msg=' . urlencode('Acesso negado.'));
+if (!isset($_SESSION['user_role']) || strtolower(trim($_SESSION['user_role'])) !== 'professor') {
+    header('Location: dashboard.php?msg=' . urlencode('Acesso negado. Role: ' . $_SESSION['user_role']));
     exit;
 }
 require 'db.php';
@@ -83,7 +83,6 @@ $name = htmlspecialchars($_SESSION['user_name']);
         </tbody>
       </table>
     <?php endif; ?>
-
     <h2>Requisitar Produto</h2>
     <form method="post">
       <label for="product_name">Produto:</label>
