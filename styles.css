@@ -15,3 +15,9 @@ a{color:#0366d6}
 .icon-card:hover{box-shadow:0 6px 18px rgba(0,0,0,0.08);transform:translateY(-3px)}
 .icon-card .emoji{font-size:36px;display:block;margin-bottom:8px}
 .icon-card h3{margin:0;font-size:16px}
+
+/* Caixa simples para destacar texto dentro de tabelas/formulários */
+.box{display:block;width:100%;padding:6px 8px;border:1px solid #e1e4e8;border-radius:6px;background:#ffffff}
+.action-btn{padding:6px 10px;border:none;border-radius:6px;cursor:pointer;color:#fff}
+.action-approve{background:#28a745}
+.action-reject{background:#dc3545}

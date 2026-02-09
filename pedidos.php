@@ -19,7 +19,12 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-$stmt = $pdo->query('SELECT * FROM orders ORDER BY id DESC');
+$stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr, u.name AS requester_name
+  FROM orders o
+  LEFT JOIN users u ON u.nrprocesso = o.requester_id
+  WHERE o.status = 'pendente'
+  ORDER BY o.id DESC");
+$stmt->execute();
 $orders = $stmt->fetchAll();
 $msg = $_GET['msg'] ?? '';
 ?>
@@ -47,16 +52,31 @@ $msg = $_GET['msg'] ?? '';
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">ID</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo (Requerente)</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nome Requerente</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ações</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
           </tr>
         </thead>
         <tbody>
         <?php foreach ($orders as $o): ?>
           <tr>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo $o['id']; ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['product_name']); ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><?php echo (int)$o['quantity']; ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['status']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $o['id']; ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['product_name']); ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><div class="box"><?php echo (int)$o['quantity']; ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_nr'] ?? $o['requester_id']); ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_name'] ?? ''); ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2">
+              <form method="post" action="order_action.php" style="display:inline">
+                <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
+                <button class="action-btn action-approve" type="submit" name="action" value="approve">Aprovar</button>
+              </form>
+              <form method="post" action="order_action.php" style="display:inline;margin-left:6px">
+                <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
+                <button class="action-btn action-reject" type="submit" name="action" value="reject">Rejeitar</button>
+              </form>
+            </td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['status']); ?></div></td>
           </tr>
         <?php endforeach; ?>
         </tbody>
