@@ -19,7 +19,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-$stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr, u.name AS requester_name
+$stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
   FROM orders o
   LEFT JOIN users u ON u.nrprocesso = o.requester_id
   WHERE o.status = 'pendente'
@@ -37,7 +37,7 @@ $msg = $_GET['msg'] ?? '';
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="container">
+  <main class="container container-wide">
     <h1>Pedidos</h1>
     <?php if ($msg): ?>
       <div class="flash"><?php echo htmlspecialchars($msg); ?></div>
@@ -53,7 +53,6 @@ $msg = $_GET['msg'] ?? '';
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo (Requerente)</th>
-            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nome Requerente</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ações</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
           </tr>
@@ -65,15 +64,14 @@ $msg = $_GET['msg'] ?? '';
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['product_name']); ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><div class="box"><?php echo (int)$o['quantity']; ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_nr'] ?? $o['requester_id']); ?></div></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_name'] ?? ''); ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
-              <form method="post" action="order_action.php" style="display:inline">
+              <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
                 <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
-                <button class="action-btn action-approve" type="submit" name="action" value="approve">Aprovar</button>
-              </form>
-              <form method="post" action="order_action.php" style="display:inline;margin-left:6px">
-                <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
-                <button class="action-btn action-reject" type="submit" name="action" value="reject">Rejeitar</button>
+                <select name="action" class="action-select">
+                  <option value="approve">Aprovar</option>
+                  <option value="reject">Rejeitar</option>
+                </select>
+                <button class="action-btn action-submit" type="submit">OK</button>
               </form>
             </td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['status']); ?></div></td>
