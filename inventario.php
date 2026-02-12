@@ -4,7 +4,7 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php?msg=' . urlencode('Por favor entre para aceder.'));
     exit;
 }
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'funcionario') {
+if (!isset($_SESSION['user_role']) || ($_SESSION['user_role'] !== 'funcionario' && $_SESSION['user_role'] !== 'administrador')) {
     header('Location: dashboard.php?msg=' . urlencode('Acesso negado.'));
     exit;
 }

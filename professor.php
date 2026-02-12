@@ -25,10 +25,22 @@ $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $product_name = trim($_POST['product_name'] ?? '');
     $quantity = (int)($_POST['quantity'] ?? 0);
+    
+    // Validar se o produto existe e tem quantidade disponível
     if ($product_name && $quantity > 0) {
-        $stmt = $pdo->prepare('INSERT INTO orders (product_name, quantity, requester_id) VALUES (?, ?, ?)');
-        $stmt->execute([$product_name, $quantity, $_SESSION['user_id']]);
-        $msg = 'Pedido registado com sucesso.';
+        $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
+        $stmt->execute([$product_name]);
+        $product = $stmt->fetch();
+        
+        if (!$product) {
+            $msg = 'Produto não encontrado.';
+        } elseif ($product['quantity'] <= 0) {
+            $msg = 'Este produto não está disponível em inventário.';
+        } else {
+            $stmt = $pdo->prepare('INSERT INTO orders (product_name, quantity, requester_id) VALUES (?, ?, ?)');
+            $stmt->execute([$product_name, $quantity, $_SESSION['user_id']]);
+            $msg = 'Pedido registado com sucesso.';
+        }
     } else {
         $msg = 'Dados inválidos.';
     }
@@ -89,7 +101,9 @@ $name = htmlspecialchars($_SESSION['user_name']);
       <select name="product_name" id="product_name" required>
         <option value="">Selecionar produto</option>
         <?php foreach ($products as $p): ?>
-          <option value="<?php echo htmlspecialchars($p['name']); ?>"><?php echo htmlspecialchars($p['name']); ?></option>
+          <?php if ($p['quantity'] > 0): ?>
+            <option value="<?php echo htmlspecialchars($p['name']); ?>"><?php echo htmlspecialchars($p['name']); ?> (<?php echo (int)$p['quantity']; ?> disponível)</option>
+          <?php endif; ?>
         <?php endforeach; ?>
       </select>
       <label for="quantity">Quantidade:</label>
