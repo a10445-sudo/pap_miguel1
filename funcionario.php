@@ -44,4 +44,4 @@ $msg = $_GET['msg'] ?? '';
     <p style="margin-top:18px"><a href="dashboard.php">Voltar ao Dashboard</a> · <a href="logout.php">Terminar sessão</a></p>
   </main>
 </body>
-</html>
+</html>                                                                               
