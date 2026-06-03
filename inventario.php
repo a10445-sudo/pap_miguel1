@@ -38,7 +38,10 @@ $products = $stmt->fetchAll();
     <?php endif; ?>
 
     <?php if (count($products) === 0): ?>
-      <p>O inventário está vazio. <a href="registar_produto.php">Registe um produto</a>.</p>
+      <p>O inventário está vazio.</p>
+      <?php if ($_SESSION['user_role'] !== 'administrador'): ?>
+        <p style="color:#555;margin-top:8px">Apenas o administrador pode registar novos produtos.</p>
+      <?php endif; ?>
     <?php else: ?>
       <table style="width:100%;border-collapse:collapse">
         <thead>
@@ -62,7 +65,11 @@ $products = $stmt->fetchAll();
       </table>
     <?php endif; ?>
 
-    <p style="margin-top:18px"><a href="registar_produto.php">Registar novo produto</a> · <a href="funcionario.php">Voltar</a></p>
+    <?php if ($_SESSION['user_role'] === 'administrador'): ?>
+      <p style="margin-top:18px"><a href="registar_produto.php">Registar novo produto</a> · <a href="administrador.php">Voltar</a></p>
+    <?php else: ?>
+      <p style="margin-top:18px"><a href="funcionario.php">Voltar</a></p>
+    <?php endif; ?>
   </main>
 </body>
 </html>
