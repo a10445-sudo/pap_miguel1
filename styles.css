@@ -32,3 +32,31 @@ a{color:#0366d6}
 .action-select{padding:6px;border-radius:6px;border:1px solid #ccd;background:#fff}
 .action-submit{padding:6px 10px;border-radius:6px;background:#0366d6;color:#fff}
 .box{display:block;width:100%;padding:10px 12px;border:1px solid #e1e4e8;border-radius:6px;background:#ffffff;min-height:40px;word-break:break-word}
+
+/* Melhorias para tabelas: evitar sobreposição de texto e tornar responsivo */
+.container-wide table{width:100%;border-collapse:collapse;table-layout:fixed}
+.container-wide th,.container-wide td{word-break:break-word;white-space:normal;overflow-wrap:anywhere;vertical-align:top;padding:8px}
+.container-wide td .box{min-height:0;padding:8px 10px;box-sizing:border-box}
+.action-select{min-width:0;width:auto;max-width:160px;padding:6px;border-radius:6px;border:1px solid #ccd;background:#fff;box-sizing:border-box;display:inline-block}
+
+/* Estilos específicos para a célula de ações: compactar select e botão sem a grande caixa branca */
+.action-cell{padding:0;margin:0;background:transparent;border:none}
+.action-cell .action-select{max-width:120px}
+.action-cell .action-submit{padding:6px 8px}
+.action-cell form{margin:0;padding:6px 0}
+
+/* Em telas pequenas, empilhar mantendo compacidade */
+@media (max-width:780px){
+	.action-cell form{flex-direction:row;gap:6px}
+}
+
+/* Melhorar responsividade: evitar sobreposição e empilhar controles de ação em telas pequenas */
+@media (max-width:780px){
+	.container-wide{padding:14px}
+	.container-wide table{display:block;overflow:auto}
+	.container-wide th,.container-wide td{white-space:normal}
+	.container-wide td form{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+	.container-wide .action-select,.container-wide .action-submit{width:100%;min-width:0}
+	.container-wide .action-submit{align-self:stretch}
+	.container-wide td .box{min-height:36px}
+}

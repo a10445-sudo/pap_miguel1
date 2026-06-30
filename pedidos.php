@@ -52,7 +52,7 @@ $msg = $_GET['msg'] ?? '';
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">ID</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
-            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo (Requerente)</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo </th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ações</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
           </tr>
@@ -65,14 +65,16 @@ $msg = $_GET['msg'] ?? '';
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><div class="box"><?php echo (int)$o['quantity']; ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_nr'] ?? $o['requester_id']); ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
-              <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
-                <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
-                <select name="action" class="action-select">
-                  <option value="approve">Aprovar</option>
-                  <option value="reject">Rejeitar</option>
-                </select>
-                <button class="action-btn action-submit" type="submit">OK</button>
-              </form>
+              <div class="action-cell">
+                <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
+                  <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
+                  <select name="action" class="action-select">
+                    <option value="approve">Aprovar</option>
+                    <option value="reject">Rejeitar</option>
+                  </select>
+                  <button class="action-btn action-submit" type="submit">OK</button>
+                </form>
+              </div>
             </td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['status']); ?></div></td>
           </tr>
