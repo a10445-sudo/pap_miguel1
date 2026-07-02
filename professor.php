@@ -50,6 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->query('SELECT * FROM products ORDER BY name');
 $products = $stmt->fetchAll();
 
+// Load available horarios for room requests
+$stmt = $pdo->query('SELECT h.id AS horario_id, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 ORDER BY s.nome, h.hora_inicio');
+$available_horarios = $stmt->fetchAll();
+
 // Get user's orders
 $stmt = $pdo->prepare('SELECT * FROM orders WHERE requester_id = ? ORDER BY created_at DESC');
 $stmt->execute([(int)$_SESSION['user_id']]);
@@ -110,6 +114,22 @@ $name = htmlspecialchars($_SESSION['user_name']);
       <input type="number" name="quantity" id="quantity" min="1" required>
       <button type="submit">Requisitar</button>
     </form>
+
+    <h2>Solicitar Sala</h2>
+    <?php if (count($available_horarios) === 0): ?>
+      <p>Não existem horários disponíveis.</p>
+    <?php else: ?>
+      <form method="post" action="requisicao_sala.php">
+        <label for="horario_id">Horário disponível:</label>
+        <select name="horario_id" id="horario_id" required>
+          <option value="">Selecionar</option>
+          <?php foreach ($available_horarios as $ah): ?>
+            <option value="<?php echo $ah['horario_id']; ?>"><?php echo htmlspecialchars($ah['sala_nome']) . ' — ' . ($ah['dia_semana'] ? $ah['dia_semana'] : $ah['data_especifica']) . ' ' . $ah['hora_inicio'] . '-' . $ah['hora_fim']; ?></option>
+          <?php endforeach; ?>
+        </select>
+        <button type="submit">Pedir Sala</button>
+      </form>
+    <?php endif; ?>
 
     <h2>Estado dos Meus Pedidos</h2>
     <?php if (count($orders) === 0): ?>

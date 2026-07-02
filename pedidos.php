@@ -19,6 +19,16 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+// criar tabela de pedidos de sala se não existir (caso o SQL não tenha sido aplicado)
+$pdo->exec("CREATE TABLE IF NOT EXISTS room_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sala_id INT NOT NULL,
+  horario_id INT NOT NULL,
+  requester_id INT NOT NULL,
+  status ENUM('pendente','aprovado','rejeitado') NOT NULL DEFAULT 'pendente',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
 $stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
   FROM orders o
   LEFT JOIN users u ON u.nrprocesso = o.requester_id
@@ -26,6 +36,10 @@ $stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
   ORDER BY o.id DESC");
 $stmt->execute();
 $orders = $stmt->fetchAll();
+// obter pedidos de sala pendentes
+$stmt = $pdo->prepare('SELECT rr.*, u.nrprocesso AS requester_nr, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM room_requests rr LEFT JOIN users u ON u.nrprocesso = rr.requester_id LEFT JOIN salas s ON s.id = rr.sala_id LEFT JOIN horarios h ON h.id = rr.horario_id WHERE rr.status = "pendente" ORDER BY rr.id DESC');
+$stmt->execute();
+$room_requests = $stmt->fetchAll();
 $msg = $_GET['msg'] ?? '';
 ?>
 <!doctype html>
@@ -51,7 +65,7 @@ $msg = $_GET['msg'] ?? '';
           <tr>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">ID</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
-            <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo </th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ações</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
@@ -62,7 +76,7 @@ $msg = $_GET['msg'] ?? '';
           <tr>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $o['id']; ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['product_name']); ?></div></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><div class="box"><?php echo (int)$o['quantity']; ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2;"><div class="box"><?php echo (int)$o['quantity']; ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_nr'] ?? $o['requester_id']); ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
               <div class="action-cell">
@@ -82,6 +96,48 @@ $msg = $_GET['msg'] ?? '';
         </tbody>
       </table>
     <?php endif; ?>
+
+      <h2 style="margin-top:24px">Pedidos de Salas</h2>
+      <?php if (count($room_requests) === 0): ?>
+        <p>Não existem pedidos de sala pendentes.</p>
+      <?php else: ?>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">ID</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Sala</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Horário</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ações</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php foreach ($room_requests as $r): ?>
+            <tr>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $r['id']; ?></div></td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['sala_nome']); ?></div></td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo ($r['dia_semana'] ? htmlspecialchars($r['dia_semana']) : htmlspecialchars($r['data_especifica'])) . ' ' . htmlspecialchars($r['hora_inicio']) . '-' . htmlspecialchars($r['hora_fim']); ?></div></td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['requester_nr'] ?? $r['requester_id']); ?></div></td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2">
+                <div class="action-cell">
+                  <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
+                    <input type="hidden" name="type" value="room">
+                    <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
+                    <select name="action" class="action-select">
+                      <option value="approve">Aprovar</option>
+                      <option value="reject">Rejeitar</option>
+                    </select>
+                    <button class="action-btn action-submit" type="submit">OK</button>
+                  </form>
+                </div>
+              </td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['status']); ?></div></td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+      <?php endif; ?>
 
     <p style="margin-top:18px"><a href="funcionario.php">Voltar</a></p>
   </main>
