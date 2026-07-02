@@ -39,6 +39,11 @@ $msg = $_GET['msg'] ?? '';
         <h3>Ver Pedidos</h3>
       </a>
 
+      <a class="icon-card" href="salas.php">
+        <span class="emoji">🏫</span>
+        <h3>Ver Salas</h3>
+      </a>
+
     </div>
 
     <p style="margin-top:18px"><a href="dashboard.php">Voltar ao Dashboard</a> · <a href="logout.php">Terminar sessão</a></p>

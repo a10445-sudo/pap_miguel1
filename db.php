@@ -20,7 +20,7 @@ try {
             ]);
             // Criar base de dados
             $tmp->exec("CREATE DATABASE IF NOT EXISTS `$DB_NAME` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            // Selecionar DB e criar tabela users se não existir
+            // Selecionar DB e criar tabelas se não existirem
             $tmp->exec("USE `$DB_NAME`;
                 CREATE TABLE IF NOT EXISTS users (
                   nrprocesso INT UNSIGNED NOT NULL,
@@ -44,6 +44,36 @@ try {
                   requester_id INT NOT NULL,
                   status VARCHAR(40) NOT NULL DEFAULT 'pendente',
                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                CREATE TABLE IF NOT EXISTS salas (
+                  id INT AUTO_INCREMENT PRIMARY KEY,
+                  nome VARCHAR(150) NOT NULL,
+                  capacidade INT DEFAULT NULL,
+                  localizacao VARCHAR(255) DEFAULT NULL,
+                  created_by INT DEFAULT NULL,
+                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                CREATE TABLE IF NOT EXISTS horarios (
+                  id INT AUTO_INCREMENT PRIMARY KEY,
+                  sala_id INT NOT NULL,
+                  dia_semana ENUM('segunda','terca','quarta','quinta','sexta','sabado','domingo') DEFAULT NULL,
+                  data_especifica DATE DEFAULT NULL,
+                  hora_inicio TIME NOT NULL,
+                  hora_fim TIME NOT NULL,
+                  disponivel TINYINT(1) NOT NULL DEFAULT 1,
+                  created_by INT DEFAULT NULL,
+                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (sala_id) REFERENCES salas(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                CREATE TABLE IF NOT EXISTS room_requests (
+                  id INT AUTO_INCREMENT PRIMARY KEY,
+                  sala_id INT NOT NULL,
+                  horario_id INT NOT NULL,
+                  requester_id INT NOT NULL,
+                  status ENUM('pendente','aprovado','rejeitado') NOT NULL DEFAULT 'pendente',
+                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (sala_id) REFERENCES salas(id) ON DELETE CASCADE,
+                  FOREIGN KEY (horario_id) REFERENCES horarios(id) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
             // Re-conectar à base de dados criada
             $pdo = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4", $DB_USER, $DB_PASS, [

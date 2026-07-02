@@ -59,6 +59,11 @@ $stmt = $pdo->prepare('SELECT * FROM orders WHERE requester_id = ? ORDER BY crea
 $stmt->execute([(int)$_SESSION['user_id']]);
 $orders = $stmt->fetchAll();
 
+// Get user's room requests
+$stmt = $pdo->prepare('SELECT rr.*, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM room_requests rr JOIN salas s ON s.id = rr.sala_id JOIN horarios h ON h.id = rr.horario_id WHERE rr.requester_id = ? ORDER BY rr.created_at DESC');
+$stmt->execute([(int)$_SESSION['user_id']]);
+$room_requests = $stmt->fetchAll();
+
 $name = htmlspecialchars($_SESSION['user_name']);
 ?>
 <!doctype html>
@@ -151,6 +156,32 @@ $name = htmlspecialchars($_SESSION['user_name']);
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><?php echo (int)$o['quantity']; ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['status']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['created_at']); ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    <?php endif; ?>
+
+    <h2>Estado dos Meus Pedidos de Sala</h2>
+    <?php if (count($room_requests) === 0): ?>
+      <p>Não tem pedidos de sala registados.</p>
+    <?php else: ?>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Sala</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Horário</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Data</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($room_requests as $rr): ?>
+          <tr>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['sala_nome']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['dia_semana'] ? $rr['dia_semana'] : $rr['data_especifica']) . ' ' . htmlspecialchars($rr['hora_inicio']) . '-' . htmlspecialchars($rr['hora_fim']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['status']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['created_at']); ?></td>
           </tr>
         <?php endforeach; ?>
         </tbody>
