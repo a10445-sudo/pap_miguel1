@@ -74,8 +74,15 @@ if ($type === 'product') {
         header('Location: pedidos.php?msg=' . urlencode('O pedido já foi processado.'));
         exit;
     }
-    // If approved, mark horario as unavailable
+    // If approved, validate horario availability before marking as unavailable
     if ($action === 'approve') {
+        $stmt = $pdo->prepare('SELECT * FROM horarios WHERE id = ?');
+        $stmt->execute([$req['horario_id']]);
+        $horario = $stmt->fetch();
+        if (!$horario || !$horario['disponivel']) {
+            header('Location: pedidos.php?msg=' . urlencode('Não é possível aprovar: o horário já não está disponível.'));
+            exit;
+        }
         $stmt = $pdo->prepare('UPDATE horarios SET disponivel = 0 WHERE id = ?');
         $stmt->execute([$req['horario_id']]);
     }

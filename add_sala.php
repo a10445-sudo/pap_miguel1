@@ -10,13 +10,13 @@ $nome = trim($_POST['nome'] ?? '');
 $cap = (int)($_POST['capacidade'] ?? 0);
 $loc = trim($_POST['localizacao'] ?? '');
 
-if (!$nome) {
-    header('Location: salas_admin.php?msg=' . urlencode('Nome inválido.'));
+if (!$nome || !$cap || !$loc) {
+    header('Location: salas_admin.php?msg=' . urlencode('Por favor preencha todos os campos de sala.'));
     exit;
 }
 
 $stmt = $pdo->prepare('INSERT INTO salas (nome, capacidade, localizacao, created_by) VALUES (?, ?, ?, ?)');
-$stmt->execute([$nome, $cap ?: null, $loc ?: null, $_SESSION['user_id']]);
+$stmt->execute([$nome, $cap, $loc, $_SESSION['user_id']]);
 
 header('Location: salas_admin.php?msg=' . urlencode('Sala adicionada.'));
 exit;

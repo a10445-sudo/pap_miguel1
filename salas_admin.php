@@ -59,8 +59,8 @@ $msg = $_GET['msg'] ?? '';
     <h2>Adicionar Sala</h2>
     <form method="post" action="add_sala.php" class="inline">
       <input name="nome" placeholder="Nome da sala" required>
-      <input name="capacidade" type="number" placeholder="Capacidade" min="1">
-      <input name="localizacao" placeholder="Localização">
+      <input name="capacidade" type="number" placeholder="Capacidade" min="1" required>
+      <input name="localizacao" placeholder="Localização" required>
       <button type="submit">Adicionar Sala</button>
     </form>
 
