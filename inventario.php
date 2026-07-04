@@ -46,7 +46,6 @@ $products = $stmt->fetchAll();
       <table style="width:100%;border-collapse:collapse">
         <thead>
           <tr>
-            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">ID</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Descrição</th>
@@ -55,7 +54,6 @@ $products = $stmt->fetchAll();
         <tbody>
         <?php foreach ($products as $p): ?>
           <tr>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo $p['id']; ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($p['name']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><?php echo (int)$p['quantity']; ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($p['description']); ?></td>
