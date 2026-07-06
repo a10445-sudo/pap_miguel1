@@ -21,18 +21,6 @@ function formatOrderStatus($status) {
     return $labels[$status] ?? htmlspecialchars($status);
 }
 
-$pdo->exec("CREATE TABLE IF NOT EXISTS orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT DEFAULT NULL,
-    product_name VARCHAR(255) NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    requester_id INT NOT NULL,
-    return_required TINYINT(1) NOT NULL DEFAULT 0,
-    status VARCHAR(40) NOT NULL DEFAULT 'pendente',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
 $stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
   FROM orders o
   LEFT JOIN users u ON u.nrprocesso = o.requester_id

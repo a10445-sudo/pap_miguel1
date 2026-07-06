@@ -20,7 +20,6 @@ if ($action === 'return_request') {
     }
 }
 
-// Determine if action is for a product order or a room request
 $type = $_POST['type'] ?? 'product';
 
 if ($type === 'product') {
@@ -107,8 +106,18 @@ if ($type === 'product') {
             exit;
         }
         $new_quantity = $product['quantity'] - $order['quantity'];
-        $stmt = $pdo->prepare('UPDATE products SET quantity = ? WHERE id = ?');
-        $stmt->execute([$new_quantity, $product['id']]);
+        if ($new_quantity > 0) {
+            $stmt = $pdo->prepare('UPDATE products SET quantity = ? WHERE id = ?');
+            $stmt->execute([$new_quantity, $product['id']]);
+        } else {
+            if ($product['returnable']) {
+                $stmt = $pdo->prepare('UPDATE products SET quantity = ? WHERE id = ?');
+                $stmt->execute([$new_quantity, $product['id']]);
+            } else {
+                $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
+                $stmt->execute([$product['id']]);
+            }
+        }
     }
     $stmt = $pdo->prepare('UPDATE orders SET status = ? WHERE id = ?');
     $stmt->execute([$status, $order_id]);

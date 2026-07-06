@@ -6,16 +6,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'professor') {
 }
 require 'db.php';
 
-// Garantir que a tabela de pedidos de sala exista antes de inserir
-$pdo->exec("CREATE TABLE IF NOT EXISTS room_requests (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  sala_id INT NOT NULL,
-  horario_id INT NOT NULL,
-  requester_id INT NOT NULL,
-  status ENUM('pendente','aprovado','rejeitado') NOT NULL DEFAULT 'pendente',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
 $horario_id = (int)($_POST['horario_id'] ?? 0);
 
 if (!$horario_id) {

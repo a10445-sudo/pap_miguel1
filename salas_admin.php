@@ -10,27 +10,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'administrador'
 }
 require 'db.php';
 
-// Garantir que as tabelas existam (fallback caso o script SQL não tenha sido executado)
-$pdo->exec("CREATE TABLE IF NOT EXISTS salas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(150) NOT NULL,
-  capacidade INT DEFAULT NULL,
-  localizacao VARCHAR(255) DEFAULT NULL,
-  created_by INT DEFAULT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-$pdo->exec("CREATE TABLE IF NOT EXISTS horarios (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  sala_id INT NOT NULL,
-  dia_semana ENUM('segunda','terca','quarta','quinta','sexta','sabado','domingo') DEFAULT NULL,
-  data_especifica DATE DEFAULT NULL,
-  hora_inicio TIME NOT NULL,
-  hora_fim TIME NOT NULL,
-  disponivel TINYINT(1) NOT NULL DEFAULT 1,
-  created_by INT DEFAULT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
 // Load salas and horarios
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY id DESC');
 $salas = $stmt->fetchAll();

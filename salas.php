@@ -10,16 +10,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'funcionario') 
 }
 require 'db.php';
 
-// Garantir que a tabela de salas exista
-$pdo->exec("CREATE TABLE IF NOT EXISTS salas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(150) NOT NULL,
-  capacidade INT DEFAULT NULL,
-  localizacao VARCHAR(255) DEFAULT NULL,
-  created_by INT DEFAULT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY nome');
 $salas = $stmt->fetchAll();
 

@@ -18,17 +18,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($name === '' || !is_numeric($quantity) || (int)$quantity < 1) {
         $msg = 'Preencha o nome e uma quantidade válida maior que zero.';
     } else {
-        // criar tabela se não existir
-        $pdo->exec("CREATE TABLE IF NOT EXISTS products (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            quantity INT NOT NULL DEFAULT 0,
-            description TEXT,
-            returnable TINYINT(1) NOT NULL DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
         $returnable = isset($_POST['returnable']) ? 1 : 0;
+        $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
+        $stmt->execute([$name]);
+        $existing = $stmt->fetch();
+
+        if ($existing) {
+            $new_quantity = $existing['quantity'] + (int)$quantity;
+            $new_returnable = $existing['returnable'] || $returnable ? 1 : 0;
+            $new_description = $description !== '' ? $description : $existing['description'];
+            $stmt = $pdo->prepare('UPDATE products SET quantity = ?, description = ?, returnable = ? WHERE id = ?');
+            $stmt->execute([$new_quantity, $new_description, $new_returnable, $existing['id']]);
+            header('Location: inventario.php?msg=' . urlencode('Quantidade adicionada ao produto existente.'));
+            exit;
+        }
+
         $stmt = $pdo->prepare('INSERT INTO products (name, quantity, description, returnable) VALUES (?, ?, ?, ?)');
         $stmt->execute([$name, (int)$quantity, $description, $returnable]);
         header('Location: inventario.php?msg=' . urlencode('Produto registado com sucesso.'));
