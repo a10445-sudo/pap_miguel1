@@ -35,15 +35,19 @@ try {
                   name VARCHAR(255) NOT NULL,
                   quantity INT NOT NULL DEFAULT 0,
                   description TEXT,
+                  returnable TINYINT(1) NOT NULL DEFAULT 0,
                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 CREATE TABLE IF NOT EXISTS orders (
                   id INT AUTO_INCREMENT PRIMARY KEY,
+                  product_id INT DEFAULT NULL,
                   product_name VARCHAR(255) NOT NULL,
                   quantity INT NOT NULL DEFAULT 1,
                   requester_id INT NOT NULL,
+                  return_required TINYINT(1) NOT NULL DEFAULT 0,
                   status VARCHAR(40) NOT NULL DEFAULT 'pendente',
-                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 CREATE TABLE IF NOT EXISTS salas (
                   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -87,4 +91,22 @@ try {
         // Em ambiente de produção não mostrar detalhes
         die('Erro de ligação à base de dados: ' . $e->getMessage());
     }
+}
+
+// Garantir colunas adicionais quando o banco de dados já existe em versões antigas
+try {
+    $stmt = $pdo->query("SHOW COLUMNS FROM products LIKE 'returnable'");
+    if ($stmt->rowCount() === 0) {
+        $pdo->exec("ALTER TABLE products ADD COLUMN returnable TINYINT(1) NOT NULL DEFAULT 0");
+    }
+    $stmt = $pdo->query("SHOW COLUMNS FROM orders LIKE 'product_id'");
+    if ($stmt->rowCount() === 0) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN product_id INT DEFAULT NULL");
+    }
+    $stmt = $pdo->query("SHOW COLUMNS FROM orders LIKE 'return_required'");
+    if ($stmt->rowCount() === 0) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN return_required TINYINT(1) NOT NULL DEFAULT 0");
+    }
+} catch (PDOException $e) {
+    // ignorar se alguma tabela ainda não existir durante o bootstrap
 }

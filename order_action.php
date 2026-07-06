@@ -6,37 +6,97 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php?msg=' . urlencode('Por favor entre para aceder.'));
     exit;
 }
-if (!isset($_SESSION['user_role']) || ($_SESSION['user_role'] !== 'funcionario' && $_SESSION['user_role'] !== 'administrador')) {
-    header('Location: dashboard.php?msg=' . urlencode('Acesso negado.'));
-    exit;
+$action = $_POST['action'] ?? '';
+$role = isset($_SESSION['user_role']) ? strtolower(trim($_SESSION['user_role'])) : '';
+if ($action === 'return_request') {
+    if ($role !== 'professor') {
+        header('Location: dashboard.php?msg=' . urlencode('Acesso negado.'));
+        exit;
+    }
+} else {
+    if ($role !== 'funcionario' && $role !== 'administrador') {
+        header('Location: dashboard.php?msg=' . urlencode('Acesso negado.'));
+        exit;
+    }
 }
 
 // Determine if action is for a product order or a room request
 $type = $_POST['type'] ?? 'product';
-$action = $_POST['action'] ?? '';
 
 if ($type === 'product') {
     $order_id = (int)($_POST['order_id'] ?? 0);
-    if (!$order_id || !in_array($action, ['approve', 'reject'])) {
-        header('Location: pedidos.php?msg=' . urlencode('Parâmetros inválidos.'));
-        exit;
-    }
-    $status = $action === 'approve' ? 'aprovado' : 'rejeitado';
+        if (!$order_id || !in_array($action, ['approve', 'reject', 'return', 'return_request'])) {
+            header('Location: pedidos.php?msg=' . urlencode('Parâmetros inválidos.'));
+            exit;
+        }
 
-    $stmt = $pdo->prepare('SELECT * FROM orders WHERE id = ?');
-    $stmt->execute([$order_id]);
-    $order = $stmt->fetch();
-    if (!$order) {
-        header('Location: pedidos.php?msg=' . urlencode('Pedido não encontrado.'));
-        exit;
-    }
-    if ($order['status'] !== 'pendente') {
-        header('Location: pedidos.php?msg=' . urlencode('O pedido já foi processado.'));
-        exit;
-    }
+        $stmt = $pdo->prepare('SELECT * FROM orders WHERE id = ?');
+        $stmt->execute([$order_id]);
+        $order = $stmt->fetch();
+        if (!$order) {
+            header('Location: pedidos.php?msg=' . urlencode('Pedido não encontrado.'));
+            exit;
+        }
+
+        if ($action === 'return_request') {
+            if ($order['status'] !== 'aprovado') {
+                header('Location: professor.php?msg=' . urlencode('Apenas pedidos aprovados podem solicitar devolução.'));
+                exit;
+            }
+            if (!$order['return_required']) {
+                header('Location: professor.php?msg=' . urlencode('Este produto não exige devolução.'));
+                exit;
+            }
+            $stmt = $pdo->prepare('UPDATE orders SET status = ? WHERE id = ?');
+            $stmt->execute(['devolucao_pendente', $order_id]);
+            header('Location: professor.php?msg=' . urlencode('Pedido de devolução registado.')); 
+            exit;
+        }
+
+        if ($action === 'return') {
+            if ($order['status'] !== 'devolucao_pendente') {
+                header('Location: devolucoes.php?msg=' . urlencode('Apenas devoluções pendentes podem ser marcadas como devolvidas.'));
+                exit;
+            }
+            if (!$order['return_required']) {
+                header('Location: devolucoes.php?msg=' . urlencode('Este produto não exige devolução.'));
+                exit;
+            }
+            if ($order['product_id']) {
+                $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+                $stmt->execute([$order['product_id']]);
+            } else {
+                $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
+                $stmt->execute([$order['product_name']]);
+            }
+            $product = $stmt->fetch();
+            if (!$product) {
+                header('Location: devolucoes.php?msg=' . urlencode('Produto não encontrado no inventário.'));
+                exit;
+            }
+            $new_quantity = $product['quantity'] + $order['quantity'];
+            $stmt = $pdo->prepare('UPDATE products SET quantity = ? WHERE id = ?');
+            $stmt->execute([$new_quantity, $product['id']]);
+            $stmt = $pdo->prepare('UPDATE orders SET status = ? WHERE id = ?');
+            $stmt->execute(['devolvido', $order_id]);
+            header('Location: devolucoes.php?msg=' . urlencode('Produto devolvido e inventário atualizado.'));
+            exit;
+        }
+
+        if ($order['status'] !== 'pendente') {
+            header('Location: pedidos.php?msg=' . urlencode('O pedido já foi processado.'));
+            exit;
+        }
+
+    $status = $action === 'approve' ? 'aprovado' : 'rejeitado';
     if ($action === 'approve') {
-        $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
-        $stmt->execute([$order['product_name']]);
+        if ($order['product_id']) {
+            $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+            $stmt->execute([$order['product_id']]);
+        } else {
+            $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
+            $stmt->execute([$order['product_name']]);
+        }
         $product = $stmt->fetch();
         if (!$product) {
             header('Location: pedidos.php?msg=' . urlencode('Produto não encontrado no inventário.'));

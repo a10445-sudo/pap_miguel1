@@ -10,35 +10,48 @@ if (!isset($_SESSION['user_role']) || strtolower(trim($_SESSION['user_role'])) !
 }
 require 'db.php';
 
+function formatOrderStatus($status) {
+    $labels = [
+        'pendente' => 'Pendente',
+        'aprovado' => 'Aprovado',
+        'rejeitado' => 'Rejeitado',
+        'devolucao_pendente' => 'Devolução pendente',
+        'devolvido' => 'Devolvido',
+    ];
+    return $labels[$status] ?? htmlspecialchars($status);
+}
+
 // criar tabela de pedidos se não existir
 $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT DEFAULT NULL,
     product_name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     requester_id INT NOT NULL,
+    return_required TINYINT(1) NOT NULL DEFAULT 0,
     status VARCHAR(40) NOT NULL DEFAULT 'pendente',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
 // Handle request submission
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $product_name = trim($_POST['product_name'] ?? '');
+    $product_id = (int)($_POST['product_id'] ?? 0);
     $quantity = (int)($_POST['quantity'] ?? 0);
     
-    // Validar se o produto existe e tem quantidade disponível
-    if ($product_name && $quantity > 0) {
-        $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
-        $stmt->execute([$product_name]);
+    if ($product_id > 0 && $quantity > 0) {
+        $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+        $stmt->execute([$product_id]);
         $product = $stmt->fetch();
-        
+
         if (!$product) {
             $msg = 'Produto não encontrado.';
-        } elseif ($product['quantity'] <= 0) {
-            $msg = 'Este produto não está disponível em inventário.';
+        } elseif ($quantity > $product['quantity']) {
+            $msg = 'Quantidade insuficiente em inventário.';
         } else {
-            $stmt = $pdo->prepare('INSERT INTO orders (product_name, quantity, requester_id) VALUES (?, ?, ?)');
-            $stmt->execute([$product_name, $quantity, $_SESSION['user_id']]);
+            $stmt = $pdo->prepare('INSERT INTO orders (product_id, product_name, quantity, requester_id, return_required) VALUES (?, ?, ?, ?, ?)');
+            $stmt->execute([$product_id, $product['name'], $quantity, $_SESSION['user_id'], $product['returnable'] ? 1 : 0]);
             $msg = 'Pedido registado com sucesso.';
         }
     } else {
@@ -106,12 +119,12 @@ $name = htmlspecialchars($_SESSION['user_name']);
     <?php endif; ?>
     <h2>Requisitar Produto</h2>
     <form method="post">
-      <label for="product_name">Produto:</label>
-      <select name="product_name" id="product_name" required>
+      <label for="product_id">Produto:</label>
+      <select name="product_id" id="product_id" required>
         <option value="">Selecionar produto</option>
         <?php foreach ($products as $p): ?>
           <?php if ($p['quantity'] > 0): ?>
-            <option value="<?php echo htmlspecialchars($p['name']); ?>"><?php echo htmlspecialchars($p['name']); ?> (<?php echo (int)$p['quantity']; ?> disponível)</option>
+            <option value="<?php echo (int)$p['id']; ?>"><?php echo htmlspecialchars($p['name']); ?> (<?php echo (int)$p['quantity']; ?> disponível)</option>
           <?php endif; ?>
         <?php endforeach; ?>
       </select>
@@ -145,7 +158,9 @@ $name = htmlspecialchars($_SESSION['user_name']);
           <tr>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Devolução</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ação</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Data</th>
           </tr>
         </thead>
@@ -154,7 +169,24 @@ $name = htmlspecialchars($_SESSION['user_name']);
           <tr>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['product_name']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><?php echo (int)$o['quantity']; ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['status']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo $o['return_required'] ? 'Sim' : 'Não'; ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo formatOrderStatus($o['status']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2">
+              <?php if ($o['status'] === 'aprovado' && $o['return_required']): ?>
+                <form method="post" action="order_action.php" style="display:inline">
+                  <input type="hidden" name="type" value="product">
+                  <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
+                  <input type="hidden" name="action" value="return_request">
+                  <button type="submit" class="action-btn action-submit">Solicitar Devolução</button>
+                </form>
+              <?php elseif ($o['status'] === 'devolucao_pendente'): ?>
+                Devolução solicitada
+              <?php elseif ($o['status'] === 'devolvido'): ?>
+                Devolvido
+              <?php else: ?>
+                —
+              <?php endif; ?>
+            </td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['created_at']); ?></td>
           </tr>
         <?php endforeach; ?>

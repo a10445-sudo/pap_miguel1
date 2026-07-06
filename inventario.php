@@ -15,6 +15,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS products (
     name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL DEFAULT 0,
     description TEXT,
+    returnable TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
@@ -49,6 +50,7 @@ $products = $stmt->fetchAll();
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:right;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Descrição</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Devolução</th>
           </tr>
         </thead>
         <tbody>
@@ -57,6 +59,7 @@ $products = $stmt->fetchAll();
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($p['name']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;text-align:right"><?php echo (int)$p['quantity']; ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($p['description']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo $p['returnable'] ? 'Sim' : 'Não'; ?></td>
           </tr>
         <?php endforeach; ?>
         </tbody>

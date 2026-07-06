@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = $_POST['quantity'] ?? '';
     $description = trim($_POST['description'] ?? '');
 
-    if ($name === '' || !is_numeric($quantity)) {
-        $msg = 'Preencha o nome e quantidade válida.';
+    if ($name === '' || !is_numeric($quantity) || (int)$quantity < 1) {
+        $msg = 'Preencha o nome e uma quantidade válida maior que zero.';
     } else {
         // criar tabela se não existir
         $pdo->exec("CREATE TABLE IF NOT EXISTS products (
@@ -24,11 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             name VARCHAR(255) NOT NULL,
             quantity INT NOT NULL DEFAULT 0,
             description TEXT,
+            returnable TINYINT(1) NOT NULL DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-        $stmt = $pdo->prepare('INSERT INTO products (name, quantity, description) VALUES (?, ?, ?)');
-        $stmt->execute([$name, (int)$quantity, $description]);
+        $returnable = isset($_POST['returnable']) ? 1 : 0;
+        $stmt = $pdo->prepare('INSERT INTO products (name, quantity, description, returnable) VALUES (?, ?, ?, ?)');
+        $stmt->execute([$name, (int)$quantity, $description, $returnable]);
         header('Location: inventario.php?msg=' . urlencode('Produto registado com sucesso.'));
         exit;
     }
@@ -54,10 +56,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="text" id="name" name="name" required>
 
       <label for="quantity">Quantidade</label>
-      <input type="number" id="quantity" name="quantity" value="1" min="0" required>
+      <input type="number" id="quantity" name="quantity" value="1" min="1" required>
 
       <label for="description">Descrição (opcional)</label>
       <input type="text" id="description" name="description">
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="returnable" name="returnable" value="1">
+        Produto com devolução obrigatória
+      </label>
 
       <button type="submit">Registar</button>
     </form>

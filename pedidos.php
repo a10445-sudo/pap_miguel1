@@ -9,14 +9,29 @@ if (!isset($_SESSION['user_role']) || ($_SESSION['user_role'] !== 'funcionario' 
     exit;
 }
 require 'db.php';
+
+function formatOrderStatus($status) {
+    $labels = [
+        'pendente' => 'Pendente',
+        'aprovado' => 'Aprovado',
+        'rejeitado' => 'Rejeitado',
+        'devolucao_pendente' => 'Devolução pendente',
+        'devolvido' => 'Devolvido',
+    ];
+    return $labels[$status] ?? htmlspecialchars($status);
+}
+
 // criar tabela de pedidos (simples) se não existir
 $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT DEFAULT NULL,
     product_name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     requester_id INT NOT NULL,
+    return_required TINYINT(1) NOT NULL DEFAULT 0,
     status VARCHAR(40) NOT NULL DEFAULT 'pendente',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
 // criar tabela de pedidos de sala se não existir (caso o SQL não tenha sido aplicado)
@@ -32,7 +47,6 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS room_requests (
 $stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
   FROM orders o
   LEFT JOIN users u ON u.nrprocesso = o.requester_id
-  WHERE o.status = 'pendente'
   ORDER BY o.id DESC");
 $stmt->execute();
 $orders = $stmt->fetchAll();
@@ -66,7 +80,8 @@ $msg = $_GET['msg'] ?? '';
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">ID</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Produto</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Quantidade</th>
-            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo </th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Devolução</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Nº Processo</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Ações</th>
             <th style="text-align:left;padding:8px;border-bottom:1px solid #eee">Status</th>
           </tr>
@@ -77,20 +92,27 @@ $msg = $_GET['msg'] ?? '';
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $o['id']; ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['product_name']); ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2;"><div class="box"><?php echo (int)$o['quantity']; ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $o['return_required'] ? 'Sim' : 'Não'; ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['requester_nr'] ?? $o['requester_id']); ?></div></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
               <div class="action-cell">
-                <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
-                  <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
-                  <select name="action" class="action-select">
-                    <option value="approve">Aprovar</option>
-                    <option value="reject">Rejeitar</option>
-                  </select>
-                  <button class="action-btn action-submit" type="submit">OK</button>
-                </form>
+                <?php if ($o['status'] === 'pendente'): ?>
+                  <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
+                    <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
+                    <select name="action" class="action-select">
+                      <option value="approve">Aprovar</option>
+                      <option value="reject">Rejeitar</option>
+                    </select>
+                    <button class="action-btn action-submit" type="submit">OK</button>
+                  </form>
+                <?php elseif ($o['status'] === 'aprovado' && $o['return_required']): ?>
+                  <div>Esperar pedido de devolução</div>
+                <?php else: ?>
+                  —
+                <?php endif; ?>
               </div>
             </td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($o['status']); ?></div></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo formatOrderStatus($o['status']); ?></div></td>
           </tr>
         <?php endforeach; ?>
         </tbody>
