@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `salas` (
 CREATE TABLE IF NOT EXISTS `horarios` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `sala_id` INT NOT NULL,
-  `dia_semana` ENUM('segunda','terca','quarta','quinta','sexta','sabado','domingo') DEFAULT NULL,
+  `dia_semana` ENUM('segunda','terca','quarta','quinta','sexta') DEFAULT NULL,
   `data_especifica` DATE DEFAULT NULL,
   `hora_inicio` TIME NOT NULL,
   `hora_fim` TIME NOT NULL,

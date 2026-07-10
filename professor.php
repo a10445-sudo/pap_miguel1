@@ -51,7 +51,7 @@ $stmt = $pdo->query('SELECT * FROM products ORDER BY name');
 $products = $stmt->fetchAll();
 
 // Load available horarios for room requests
-$stmt = $pdo->query('SELECT h.id AS horario_id, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 ORDER BY s.nome, h.hora_inicio');
+$stmt = $pdo->query("SELECT h.id AS horario_id, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 AND (h.dia_semana IS NULL OR h.dia_semana IN ('segunda','terca','quarta','quinta','sexta')) ORDER BY s.nome, h.hora_inicio");
 $available_horarios = $stmt->fetchAll();
 
 // Get user's orders

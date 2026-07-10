@@ -13,7 +13,7 @@ require 'db.php';
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY nome');
 $salas = $stmt->fetchAll();
 
-$stmt = $pdo->query('SELECT h.*, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 ORDER BY s.nome, h.hora_inicio');
+$stmt = $pdo->query("SELECT h.*, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 AND (h.dia_semana IS NULL OR h.dia_semana IN ('segunda','terca','quarta','quinta','sexta')) ORDER BY s.nome, h.hora_inicio");
 $horarios = $stmt->fetchAll();
 
 $name = htmlspecialchars($_SESSION['user_name']);

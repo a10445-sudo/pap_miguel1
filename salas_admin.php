@@ -14,7 +14,7 @@ require 'db.php';
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY id DESC');
 $salas = $stmt->fetchAll();
 
-$stmt = $pdo->query('SELECT h.*, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id ORDER BY h.id DESC');
+$stmt = $pdo->query("SELECT h.*, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.dia_semana IS NULL OR h.dia_semana IN ('segunda','terca','quarta','quinta','sexta') ORDER BY h.id DESC");
 $horarios = $stmt->fetchAll();
 
 $msg = $_GET['msg'] ?? '';
@@ -58,8 +58,6 @@ $msg = $_GET['msg'] ?? '';
         <option value="quarta">Quarta</option>
         <option value="quinta">Quinta</option>
         <option value="sexta">Sexta</option>
-        <option value="sabado">Sábado</option>
-        <option value="domingo">Domingo</option>
       </select>
       <input type="date" name="data_especifica">
       <input type="time" name="hora_inicio" required>

@@ -12,6 +12,12 @@ $data = $_POST['data_especifica'] ?? null;
 $inicio = $_POST['hora_inicio'] ?? null;
 $fim = $_POST['hora_fim'] ?? null;
 
+$allowedWeekdays = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
+if ($dia !== null && $dia !== '' && !in_array($dia, $allowedWeekdays, true)) {
+    header('Location: salas_admin.php?msg=' . urlencode('Dia da semana inválido.'));
+    exit;
+}
+
 if (!$sala_id || !$inicio || !$fim) {
     header('Location: salas_admin.php?msg=' . urlencode('Dados inválidos para horário.'));
     exit;
