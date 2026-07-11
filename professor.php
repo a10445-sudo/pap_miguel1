@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = (int)($_POST['quantity'] ?? 0);
     
     if ($product_id > 0 && $quantity > 0) {
-        $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT id, nome AS name, quantidade AS quantity, descricao AS description, devolvivel AS returnable FROM produtos WHERE id = ?');
         $stmt->execute([$product_id]);
         $product = $stmt->fetch();
 
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($quantity > $product['quantity']) {
             $msg = 'Quantidade insuficiente em inventário.';
         } else {
-            $stmt = $pdo->prepare('INSERT INTO orders (product_id, product_name, quantity, requester_id, return_required) VALUES (?, ?, ?, ?, ?)');
+            $stmt = $pdo->prepare('INSERT INTO pedidos (produto_id, nome_produto, quantidade, pedido_por, devolucao_obrigatoria) VALUES (?, ?, ?, ?, ?)');
             $stmt->execute([$product_id, $product['name'], $quantity, $_SESSION['user_id'], $product['returnable'] ? 1 : 0]);
             $msg = 'Pedido registado com sucesso.';
         }
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get products
-$stmt = $pdo->query('SELECT * FROM products ORDER BY name');
+$stmt = $pdo->query('SELECT id, nome AS name, quantidade AS quantity, descricao AS description, devolvivel AS returnable FROM produtos ORDER BY nome');
 $products = $stmt->fetchAll();
 
 // Load available horarios for room requests
@@ -55,12 +55,12 @@ $stmt = $pdo->query("SELECT h.id AS horario_id, h.hora_inicio, h.hora_fim, h.dia
 $available_horarios = $stmt->fetchAll();
 
 // Get user's orders
-$stmt = $pdo->prepare('SELECT * FROM orders WHERE requester_id = ? ORDER BY created_at DESC');
+$stmt = $pdo->prepare('SELECT id, produto_id AS product_id, nome_produto AS product_name, quantidade AS quantity, pedido_por AS requester_id, estado AS status, devolucao_obrigatoria AS return_required, criado_em AS created_at FROM pedidos WHERE pedido_por = ? ORDER BY criado_em DESC');
 $stmt->execute([(int)$_SESSION['user_id']]);
 $orders = $stmt->fetchAll();
 
 // Get user's room requests
-$stmt = $pdo->prepare('SELECT rr.*, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM room_requests rr JOIN salas s ON s.id = rr.sala_id JOIN horarios h ON h.id = rr.horario_id WHERE rr.requester_id = ? ORDER BY rr.created_at DESC');
+$stmt = $pdo->prepare('SELECT rr.id, rr.sala_id, rr.horario_id, rr.pedido_por AS requester_id, rr.estado AS status, rr.criado_em AS created_at, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM requisicao_sala rr JOIN salas s ON s.id = rr.sala_id JOIN horarios h ON h.id = rr.horario_id WHERE rr.pedido_por = ? ORDER BY rr.criado_em DESC');
 $stmt->execute([(int)$_SESSION['user_id']]);
 $room_requests = $stmt->fetchAll();
 
@@ -160,7 +160,7 @@ $name = htmlspecialchars($_SESSION['user_name']);
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo formatOrderStatus($o['status']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
               <?php if ($o['status'] === 'aprovado' && $o['return_required']): ?>
-                <form method="post" action="order_action.php" style="display:inline">
+                <form method="post" action="acao_pedidos.php" style="display:inline">
                   <input type="hidden" name="type" value="product">
                   <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
                   <input type="hidden" name="action" value="return_request">

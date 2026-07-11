@@ -21,14 +21,14 @@ function formatOrderStatus($status) {
     return $labels[$status] ?? htmlspecialchars($status);
 }
 
-$stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
-  FROM orders o
-  LEFT JOIN users u ON u.nrprocesso = o.requester_id
+$stmt = $pdo->prepare("SELECT o.id, o.nome_produto AS product_name, o.quantidade AS quantity, o.estado AS status, o.devolucao_obrigatoria AS return_required, u.numero_processo AS requester_nr, o.pedido_por AS requester_id
+  FROM pedidos o
+  LEFT JOIN utilizadores u ON u.numero_processo = o.pedido_por
   ORDER BY o.id DESC");
 $stmt->execute();
 $orders = $stmt->fetchAll();
 // obter pedidos de sala pendentes
-$stmt = $pdo->prepare('SELECT rr.*, u.nrprocesso AS requester_nr, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM room_requests rr LEFT JOIN users u ON u.nrprocesso = rr.requester_id LEFT JOIN salas s ON s.id = rr.sala_id LEFT JOIN horarios h ON h.id = rr.horario_id WHERE rr.status = "pendente" ORDER BY rr.id DESC');
+$stmt = $pdo->prepare('SELECT rr.id, rr.pedido_por AS requester_id, rr.estado AS status, u.numero_processo AS requester_nr, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM requisicao_sala rr LEFT JOIN utilizadores u ON u.numero_processo = rr.pedido_por LEFT JOIN salas s ON s.id = rr.sala_id LEFT JOIN horarios h ON h.id = rr.horario_id WHERE rr.estado = "pendente" ORDER BY rr.id DESC');
 $stmt->execute();
 $room_requests = $stmt->fetchAll();
 $msg = $_GET['msg'] ?? '';
@@ -74,7 +74,7 @@ $msg = $_GET['msg'] ?? '';
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
               <div class="action-cell">
                 <?php if ($o['status'] === 'pendente'): ?>
-                  <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
+                  <form method="post" action="acao_pedidos.php" style="display:flex;gap:6px;align-items:center">
                     <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
                     <select name="action" class="action-select">
                       <option value="approve">Aprovar</option>
@@ -120,7 +120,7 @@ $msg = $_GET['msg'] ?? '';
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['requester_nr'] ?? $r['requester_id']); ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2">
                 <div class="action-cell">
-                  <form method="post" action="order_action.php" style="display:flex;gap:6px;align-items:center">
+                  <form method="post" action="acao_pedidos.php" style="display:flex;gap:6px;align-items:center">
                     <input type="hidden" name="type" value="room">
                     <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
                     <select name="action" class="action-select">

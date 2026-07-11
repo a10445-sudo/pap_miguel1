@@ -11,7 +11,7 @@ $msg = '';
 $product = null;
 
 if ($product_id > 0) {
-    $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, nome AS name, quantidade AS quantity, descricao AS description, devolvivel AS returnable FROM produtos WHERE id = ?');
     $stmt->execute([$product_id]);
     $product = $stmt->fetch();
 }
@@ -22,14 +22,26 @@ if (!$product) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $add_quantity = (int)($_POST['add_quantity'] ?? 0);
-    if ($add_quantity < 1) {
-        $msg = 'Introduza uma quantidade válida maior que zero.';
+    $action = $_POST['action'] ?? 'update';
+
+    if ($action === 'delete') {
+        $stmt = $pdo->prepare('DELETE FROM produtos WHERE id = ?');
+        $stmt->execute([$product_id]);
+        header('Location: inventario.php?msg=' . urlencode('Produto eliminado com sucesso.'));
+        exit;
+    }
+
+    $name = trim($_POST['name'] ?? '');
+    $quantity = (int)($_POST['quantity'] ?? 0);
+    $description = trim($_POST['description'] ?? '');
+    $returnable = isset($_POST['returnable']) ? 1 : 0;
+
+    if ($name === '' || $quantity < 0) {
+        $msg = 'Preencha o nome e uma quantidade válida.';
     } else {
-        $new_quantity = $product['quantity'] + $add_quantity;
-        $stmt = $pdo->prepare('UPDATE products SET quantity = ? WHERE id = ?');
-        $stmt->execute([$new_quantity, $product_id]);
-        header('Location: inventario.php?msg=' . urlencode('Quantidade adicionada com sucesso.'));
+        $stmt = $pdo->prepare('UPDATE produtos SET nome = ?, quantidade = ?, descricao = ?, devolvivel = ? WHERE id = ?');
+        $stmt->execute([$name, $quantity, $description, $returnable, $product_id]);
+        header('Location: inventario.php?msg=' . urlencode('Produto atualizado com sucesso.'));
         exit;
     }
 }
@@ -49,15 +61,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="flash"><?php echo htmlspecialchars($msg); ?></div>
     <?php endif; ?>
 
-    <p><strong>Produto:</strong> <?php echo htmlspecialchars($product['name']); ?></p>
-    <p><strong>Quantidade atual:</strong> <?php echo (int)$product['quantity']; ?></p>
-    <p><strong>Descrição:</strong> <?php echo htmlspecialchars($product['description']); ?></p>
-    <p><strong>Devolução:</strong> <?php echo $product['returnable'] ? 'Sim' : 'Não'; ?></p>
-
     <form method="post">
-      <label for="add_quantity">Quantidade a adicionar</label>
-      <input type="number" id="add_quantity" name="add_quantity" min="1" value="1" required>
-      <button type="submit">Adicionar Quantidade</button>
+      <input type="hidden" name="action" value="update">
+
+      <label for="name">Nome do produto</label>
+      <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required>
+
+      <label for="quantity">Quantidade</label>
+      <input type="number" id="quantity" name="quantity" min="0" value="<?php echo (int)$product['quantity']; ?>" required>
+
+      <label for="description">Descrição</label>
+      <input type="text" id="description" name="description" value="<?php echo htmlspecialchars($product['description']); ?>">
+
+      <label class="checkbox-label">
+        <input type="checkbox" name="returnable" value="1" <?php echo $product['returnable'] ? 'checked' : ''; ?>>
+        Produto com devolução obrigatória
+      </label>
+
+      <button type="submit">Guardar alterações</button>
+    </form>
+
+    <form method="post" style="margin-top:12px">
+      <input type="hidden" name="action" value="delete">
+      <button type="submit" style="background:#c0392b;color:white">Eliminar produto</button>
     </form>
 
     <p style="margin-top:18px"><a href="inventario.php">Voltar ao inventário</a></p>

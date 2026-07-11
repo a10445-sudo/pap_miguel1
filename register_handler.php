@@ -13,7 +13,7 @@ if (!$nrprocesso || !ctype_digit($nrprocesso) || !$name || !$password || !in_arr
 }
 
 // Verificar número de processo existente
-$stmt = $pdo->prepare('SELECT nrprocesso FROM users WHERE nrprocesso = ?');
+$stmt = $pdo->prepare('SELECT numero_processo FROM utilizadores WHERE numero_processo = ?');
 $stmt->execute([$nrprocesso]);
 if ($stmt->fetch()) {
     header('Location: register.php?msg=' . urlencode('Número de processo já registado.'));
@@ -21,7 +21,7 @@ if ($stmt->fetch()) {
 }
 
 $hash = password_hash($password, PASSWORD_DEFAULT);
-$stmt = $pdo->prepare('INSERT INTO users (nrprocesso, name, password, role) VALUES (?, ?, ?, ?)');
+$stmt = $pdo->prepare('INSERT INTO utilizadores (numero_processo, nome, palavra_passe, tipo) VALUES (?, ?, ?, ?)');
 try {
     $stmt->execute([$nrprocesso, $name, $hash, $role]);
     header('Location: index.php?msg=' . urlencode('Registo efetuado com sucesso. Pode entrar.'));

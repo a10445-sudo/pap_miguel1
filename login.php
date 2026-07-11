@@ -10,7 +10,7 @@ if (!$nrprocesso || !$password) {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT nrprocesso AS id, password, name, role FROM users WHERE nrprocesso = ?');
+$stmt = $pdo->prepare('SELECT numero_processo AS id, palavra_passe AS password, nome AS name, tipo AS role FROM utilizadores WHERE numero_processo = ?');
 $stmt->execute([$nrprocesso]);
 $user = $stmt->fetch();
 

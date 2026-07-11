@@ -22,7 +22,7 @@ if (!$h) {
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO room_requests (sala_id, horario_id, requester_id) VALUES (?, ?, ?)');
+$stmt = $pdo->prepare('INSERT INTO requisicao_sala (sala_id, horario_id, pedido_por) VALUES (?, ?, ?)');
 $stmt->execute([$h['sala_id'], $horario_id, $_SESSION['user_id']]);
 
 header('Location: professor.php?msg=' . urlencode('Pedido de sala registado.'));

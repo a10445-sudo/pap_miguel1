@@ -23,8 +23,8 @@ if (!$sala_id || !$inicio || !$fim) {
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO horarios (sala_id, dia_semana, data_especifica, hora_inicio, hora_fim, created_by) VALUES (?, ?, ?, ?, ?, ?)');
-$stmt->execute([$sala_id, $dia ?: null, $data ?: null, $inicio, $fim, $_SESSION['user_id']]);
+$stmt = $pdo->prepare('INSERT INTO horarios (sala_id, dia_semana, data_especifica, hora_inicio, hora_fim, criado_por) VALUES (?, ?, ?, ?, ?, ?)');
+$stmt->execute([$sala_id, $dia ?: null, $data ?: null, $inicio, $fim, isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null]);
 
 header('Location: salas_admin.php?msg=' . urlencode('Horário adicionado.'));
 exit;

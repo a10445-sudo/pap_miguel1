@@ -21,10 +21,10 @@ function formatOrderStatus($status) {
     return $labels[$status] ?? htmlspecialchars($status);
 }
 
-$stmt = $pdo->prepare("SELECT o.*, u.nrprocesso AS requester_nr
-  FROM orders o
-  LEFT JOIN users u ON u.nrprocesso = o.requester_id
-  WHERE o.status = 'devolucao_pendente' AND o.return_required = 1
+$stmt = $pdo->prepare("SELECT o.id, o.nome_produto AS product_name, o.quantidade AS quantity, o.estado AS status, o.devolucao_obrigatoria AS return_required, u.numero_processo AS requester_nr, o.pedido_por AS requester_id
+  FROM pedidos o
+  LEFT JOIN utilizadores u ON u.numero_processo = o.pedido_por
+  WHERE o.estado = 'devolucao_pendente' AND o.devolucao_obrigatoria = 1
   ORDER BY o.id DESC");
 $stmt->execute();
 $orders = $stmt->fetchAll();
@@ -69,7 +69,7 @@ $msg = $_GET['msg'] ?? '';
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo formatOrderStatus($o['status']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2">
               <?php if ($o['status'] === 'devolucao_pendente'): ?>
-                <form method="post" action="order_action.php" style="display:inline">
+                <form method="post" action="acao_pedidos.php" style="display:inline">
                   <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
                   <input type="hidden" name="action" value="return">
                   <button type="submit" class="action-btn action-submit">Marcar Devolvido</button>

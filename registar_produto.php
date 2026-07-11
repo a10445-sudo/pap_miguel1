@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $msg = 'Preencha o nome e uma quantidade válida maior que zero.';
     } else {
         $returnable = isset($_POST['returnable']) ? 1 : 0;
-        $stmt = $pdo->prepare('SELECT * FROM products WHERE name = ?');
+        $stmt = $pdo->prepare('SELECT id, nome AS name, quantidade AS quantity, descricao AS description, devolvivel AS returnable FROM produtos WHERE nome = ?');
         $stmt->execute([$name]);
         $existing = $stmt->fetch();
 
@@ -27,13 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $new_quantity = $existing['quantity'] + (int)$quantity;
             $new_returnable = $existing['returnable'] || $returnable ? 1 : 0;
             $new_description = $description !== '' ? $description : $existing['description'];
-            $stmt = $pdo->prepare('UPDATE products SET quantity = ?, description = ?, returnable = ? WHERE id = ?');
+            $stmt = $pdo->prepare('UPDATE produtos SET quantidade = ?, descricao = ?, devolvivel = ? WHERE id = ?');
             $stmt->execute([$new_quantity, $new_description, $new_returnable, $existing['id']]);
             header('Location: inventario.php?msg=' . urlencode('Quantidade adicionada ao produto existente.'));
             exit;
         }
 
-        $stmt = $pdo->prepare('INSERT INTO products (name, quantity, description, returnable) VALUES (?, ?, ?, ?)');
+        $stmt = $pdo->prepare('INSERT INTO produtos (nome, quantidade, descricao, devolvivel) VALUES (?, ?, ?, ?)');
         $stmt->execute([$name, (int)$quantity, $description, $returnable]);
         header('Location: inventario.php?msg=' . urlencode('Produto registado com sucesso.'));
         exit;

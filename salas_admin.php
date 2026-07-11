@@ -36,7 +36,7 @@ $msg = $_GET['msg'] ?? '';
     <?php endif; ?>
 
     <h2>Adicionar Sala</h2>
-    <form method="post" action="add_sala.php" class="inline">
+    <form method="post" action="nova_sala.php" class="inline">
       <input name="nome" placeholder="Nome da sala" required>
       <input name="capacidade" type="number" placeholder="Capacidade" min="1" required>
       <input name="localizacao" placeholder="Localização" required>
@@ -71,7 +71,10 @@ $msg = $_GET['msg'] ?? '';
     <?php else: ?>
       <ul>
         <?php foreach ($salas as $s): ?>
-          <li><?php echo htmlspecialchars($s['nome']); ?> — <?php echo htmlspecialchars($s['localizacao']); ?> (<?php echo $s['capacidade'] ? (int)$s['capacidade'] : '-'; ?>)</li>
+          <li>
+            <?php echo htmlspecialchars($s['nome']); ?> — <?php echo htmlspecialchars($s['localizacao']); ?> (<?php echo $s['capacidade'] ? (int)$s['capacidade'] : '-'; ?>)
+            · <a href="editar_sala.php?sala_id=<?php echo (int)$s['id']; ?>">Modificar</a>
+          </li>
         <?php endforeach; ?>
       </ul>
     <?php endif; ?>

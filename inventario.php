@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_role']) || ($_SESSION['user_role'] !== 'funcionario' 
 require 'db.php';
 
 $msg = $_GET['msg'] ?? '';
-$stmt = $pdo->query('SELECT * FROM products ORDER BY id DESC');
+$stmt = $pdo->query('SELECT id, nome AS name, quantidade AS quantity, descricao AS description, devolvivel AS returnable FROM produtos ORDER BY id DESC');
 $products = $stmt->fetchAll();
 ?>
 <!doctype html>
