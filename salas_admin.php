@@ -14,7 +14,7 @@ require 'db.php';
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY id DESC');
 $salas = $stmt->fetchAll();
 
-$stmt = $pdo->query("SELECT h.*, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.dia_semana IS NULL OR h.dia_semana IN ('segunda','terca','quarta','quinta','sexta') ORDER BY h.id DESC");
+$stmt = $pdo->query('SELECT h.*, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id ORDER BY h.id DESC');
 $horarios = $stmt->fetchAll();
 
 $msg = $_GET['msg'] ?? '';
@@ -51,14 +51,6 @@ $msg = $_GET['msg'] ?? '';
           <option value="<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['nome']); ?></option>
         <?php endforeach; ?>
       </select>
-      <select name="dia_semana">
-        <option value="">Data específica</option>
-        <option value="segunda">Segunda</option>
-        <option value="terca">Terça</option>
-        <option value="quarta">Quarta</option>
-        <option value="quinta">Quinta</option>
-        <option value="sexta">Sexta</option>
-      </select>
       <input type="date" name="data_especifica">
       <input type="time" name="hora_inicio" required>
       <input type="time" name="hora_fim" required>
@@ -91,7 +83,7 @@ $msg = $_GET['msg'] ?? '';
         <?php foreach ($horarios as $h): ?>
           <tr>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['sala_nome']); ?></td>
-            <td style="padding:6px;border-bottom:1px solid #eee"><?php echo $h['dia_semana'] ? htmlspecialchars($h['dia_semana']) : htmlspecialchars($h['data_especifica']); ?></td>
+            <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['data_especifica'] ?: '-'); ?></td>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['hora_inicio']); ?></td>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['hora_fim']); ?></td>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo $h['disponivel'] ? 'Sim' : 'Não'; ?></td>

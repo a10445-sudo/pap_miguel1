@@ -41,11 +41,10 @@ CREATE TABLE IF NOT EXISTS `salas` (
   `criado_em` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabela de horários para salas. Pode ser recorrente por dia da semana ou uma data específica.
+-- Tabela de horários para salas.
 CREATE TABLE IF NOT EXISTS `horarios` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `sala_id` INT NOT NULL,
-  `dia_semana` ENUM('segunda','terca','quarta','quinta','sexta') DEFAULT NULL,
   `data_especifica` DATE DEFAULT NULL,
   `hora_inicio` TIME NOT NULL,
   `hora_fim` TIME NOT NULL,

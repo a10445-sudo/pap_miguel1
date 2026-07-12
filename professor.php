@@ -51,7 +51,7 @@ $stmt = $pdo->query('SELECT id, nome AS name, quantidade AS quantity, descricao 
 $products = $stmt->fetchAll();
 
 // Load available horarios for room requests
-$stmt = $pdo->query("SELECT h.id AS horario_id, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 AND (h.dia_semana IS NULL OR h.dia_semana IN ('segunda','terca','quarta','quinta','sexta')) ORDER BY s.nome, h.hora_inicio");
+$stmt = $pdo->query('SELECT h.id AS horario_id, h.hora_inicio, h.hora_fim, h.data_especifica, s.nome AS sala_nome FROM horarios h JOIN salas s ON s.id = h.sala_id WHERE h.disponivel = 1 ORDER BY s.nome, h.hora_inicio');
 $available_horarios = $stmt->fetchAll();
 
 // Get user's orders
@@ -60,7 +60,7 @@ $stmt->execute([(int)$_SESSION['user_id']]);
 $orders = $stmt->fetchAll();
 
 // Get user's room requests
-$stmt = $pdo->prepare('SELECT rr.id, rr.sala_id, rr.horario_id, rr.pedido_por AS requester_id, rr.estado AS status, rr.criado_em AS created_at, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM requisicao_sala rr JOIN salas s ON s.id = rr.sala_id JOIN horarios h ON h.id = rr.horario_id WHERE rr.pedido_por = ? ORDER BY rr.criado_em DESC');
+$stmt = $pdo->prepare('SELECT rr.id, rr.sala_id, rr.horario_id, rr.pedido_por AS requester_id, rr.estado AS status, rr.criado_em AS created_at, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.data_especifica FROM requisicao_sala rr JOIN salas s ON s.id = rr.sala_id JOIN horarios h ON h.id = rr.horario_id WHERE rr.pedido_por = ? ORDER BY rr.criado_em DESC');
 $stmt->execute([(int)$_SESSION['user_id']]);
 $room_requests = $stmt->fetchAll();
 
@@ -129,7 +129,7 @@ $name = htmlspecialchars($_SESSION['user_name']);
         <select name="horario_id" id="horario_id" required>
           <option value="">Selecionar</option>
           <?php foreach ($available_horarios as $ah): ?>
-            <option value="<?php echo $ah['horario_id']; ?>"><?php echo htmlspecialchars($ah['sala_nome']) . ' — ' . ($ah['dia_semana'] ? $ah['dia_semana'] : $ah['data_especifica']) . ' ' . $ah['hora_inicio'] . '-' . $ah['hora_fim']; ?></option>
+            <option value="<?php echo $ah['horario_id']; ?>"><?php echo htmlspecialchars($ah['sala_nome']) . ' — ' . ($ah['data_especifica'] ? $ah['data_especifica'] : 'Sem data') . ' ' . $ah['hora_inicio'] . '-' . $ah['hora_fim']; ?></option>
           <?php endforeach; ?>
         </select>
         <button type="submit">Pedir Sala</button>
@@ -198,7 +198,7 @@ $name = htmlspecialchars($_SESSION['user_name']);
         <?php foreach ($room_requests as $rr): ?>
           <tr>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['sala_nome']); ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['dia_semana'] ? $rr['dia_semana'] : $rr['data_especifica']) . ' ' . htmlspecialchars($rr['hora_inicio']) . '-' . htmlspecialchars($rr['hora_fim']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['data_especifica'] ?: '-') . ' ' . htmlspecialchars($rr['hora_inicio']) . '-' . htmlspecialchars($rr['hora_fim']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['status']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['created_at']); ?></td>
           </tr>

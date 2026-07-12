@@ -14,7 +14,7 @@ if (!$horario_id) {
 }
 
 // Obter horário e sala
-$stmt = $pdo->prepare('SELECT * FROM horarios WHERE id = ? AND disponivel = 1 AND (dia_semana IS NULL OR dia_semana IN ("segunda","terca","quarta","quinta","sexta"))');
+$stmt = $pdo->prepare('SELECT * FROM horarios WHERE id = ? AND disponivel = 1');
 $stmt->execute([$horario_id]);
 $h = $stmt->fetch();
 if (!$h) {

@@ -28,7 +28,7 @@ $stmt = $pdo->prepare("SELECT o.id, o.nome_produto AS product_name, o.quantidade
 $stmt->execute();
 $orders = $stmt->fetchAll();
 // obter pedidos de sala pendentes
-$stmt = $pdo->prepare('SELECT rr.id, rr.pedido_por AS requester_id, rr.estado AS status, u.numero_processo AS requester_nr, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.dia_semana, h.data_especifica FROM requisicao_sala rr LEFT JOIN utilizadores u ON u.numero_processo = rr.pedido_por LEFT JOIN salas s ON s.id = rr.sala_id LEFT JOIN horarios h ON h.id = rr.horario_id WHERE rr.estado = "pendente" ORDER BY rr.id DESC');
+$stmt = $pdo->prepare('SELECT rr.id, rr.pedido_por AS requester_id, rr.estado AS status, u.numero_processo AS requester_nr, s.nome AS sala_nome, h.hora_inicio, h.hora_fim, h.data_especifica FROM requisicao_sala rr LEFT JOIN utilizadores u ON u.numero_processo = rr.pedido_por LEFT JOIN salas s ON s.id = rr.sala_id LEFT JOIN horarios h ON h.id = rr.horario_id WHERE rr.estado = "pendente" ORDER BY rr.id DESC');
 $stmt->execute();
 $room_requests = $stmt->fetchAll();
 $msg = $_GET['msg'] ?? '';
@@ -116,7 +116,7 @@ $msg = $_GET['msg'] ?? '';
             <tr>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $r['id']; ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['sala_nome']); ?></div></td>
-              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo ($r['dia_semana'] ? htmlspecialchars($r['dia_semana']) : htmlspecialchars($r['data_especifica'])) . ' ' . htmlspecialchars($r['hora_inicio']) . '-' . htmlspecialchars($r['hora_fim']); ?></div></td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['data_especifica'] ?: '-') . ' ' . htmlspecialchars($r['hora_inicio']) . '-' . htmlspecialchars($r['hora_fim']); ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['requester_nr'] ?? $r['requester_id']); ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2">
                 <div class="action-cell">
