@@ -15,8 +15,8 @@ if (!$nome || !$cap || !$loc) {
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO salas (nome, capacidade, localizacao, criado_por) VALUES (?, ?, ?, ?)');
-$stmt->execute([$nome, $cap, $loc, isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null]);
+$stmt = $pdo->prepare('INSERT INTO salas (nome, capacidade, localizacao) VALUES (?, ?, ?)');
+$stmt->execute([$nome, $cap, $loc]);
 
 header('Location: salas_admin.php?msg=' . urlencode('Sala adicionada.'));
 exit;

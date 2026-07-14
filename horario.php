@@ -16,8 +16,8 @@ if (!$sala_id || !$inicio || !$fim) {
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO horarios (sala_id, data_especifica, hora_inicio, hora_fim, criado_por) VALUES (?, ?, ?, ?, ?)');
-$stmt->execute([$sala_id, $data ?: null, $inicio, $fim, isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null]);
+$stmt = $pdo->prepare('INSERT INTO horarios (sala_id, data_especifica, hora_inicio, hora_fim) VALUES (?, ?, ?, ?)');
+$stmt->execute([$sala_id, $data ?: null, $inicio, $fim]);
 
 header('Location: salas_admin.php?msg=' . urlencode('Horário adicionado.'));
 exit;

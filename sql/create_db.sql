@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS `salas` (
   `nome` VARCHAR(150) NOT NULL,
   `capacidade` INT DEFAULT NULL,
   `localizacao` VARCHAR(255) DEFAULT NULL,
-  `criado_por` INT DEFAULT NULL,
   `criado_em` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -49,7 +48,6 @@ CREATE TABLE IF NOT EXISTS `horarios` (
   `hora_inicio` TIME NOT NULL,
   `hora_fim` TIME NOT NULL,
   `disponivel` TINYINT(1) NOT NULL DEFAULT 1,
-  `criado_por` INT DEFAULT NULL,
   `criado_em` DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`sala_id`) REFERENCES `salas`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
