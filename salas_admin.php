@@ -10,6 +10,19 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'administrador'
 }
 require 'db.php';
 
+function formatDateValue($value) {
+    if (empty($value)) {
+        return '-';
+    }
+
+    try {
+        $date = new DateTime($value);
+        return $date->format('d/m/Y');
+    } catch (Exception $e) {
+        return htmlspecialchars((string)$value);
+    }
+}
+
 // Load salas and horarios
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY id DESC');
 $salas = $stmt->fetchAll();
@@ -83,7 +96,7 @@ $msg = $_GET['msg'] ?? '';
         <?php foreach ($horarios as $h): ?>
           <tr>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['sala_nome']); ?></td>
-            <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['data_especifica'] ?: '-'); ?></td>
+            <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars(formatDateValue($h['data_especifica'])); ?></td>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['hora_inicio']); ?></td>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo htmlspecialchars($h['hora_fim']); ?></td>
             <td style="padding:6px;border-bottom:1px solid #eee"><?php echo $h['disponivel'] ? 'Sim' : 'Não'; ?></td>

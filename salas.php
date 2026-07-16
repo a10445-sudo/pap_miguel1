@@ -10,6 +10,19 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'funcionario') 
 }
 require 'db.php';
 
+function formatDateValue($value) {
+    if (empty($value)) {
+        return '-';
+    }
+
+    try {
+        $date = new DateTime($value);
+        return $date->format('d/m/Y');
+    } catch (Exception $e) {
+        return htmlspecialchars((string)$value);
+    }
+}
+
 $stmt = $pdo->query('SELECT * FROM salas ORDER BY nome');
 $salas = $stmt->fetchAll();
 
@@ -74,7 +87,7 @@ $msg = $_GET['msg'] ?? '';
         <?php foreach ($horarios as $h): ?>
           <tr>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($h['sala_nome']); ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($h['data_especifica'] ?: '-'); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars(formatDateValue($h['data_especifica'])); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($h['hora_inicio']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($h['hora_fim']); ?></td>
           </tr>

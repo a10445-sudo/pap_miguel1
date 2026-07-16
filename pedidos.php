@@ -21,6 +21,19 @@ function formatOrderStatus($status) {
     return $labels[$status] ?? htmlspecialchars($status);
 }
 
+function formatDateValue($value) {
+    if (empty($value)) {
+        return '-';
+    }
+
+    try {
+        $date = new DateTime($value);
+        return $date->format('d/m/Y');
+    } catch (Exception $e) {
+        return htmlspecialchars((string)$value);
+    }
+}
+
 $stmt = $pdo->prepare("SELECT o.id, o.nome_produto AS product_name, o.quantidade AS quantity, o.estado AS status, o.devolucao_obrigatoria AS return_required, u.numero_processo AS requester_nr, o.pedido_por AS requester_id
   FROM pedidos o
   LEFT JOIN utilizadores u ON u.numero_processo = o.pedido_por
@@ -116,7 +129,7 @@ $msg = $_GET['msg'] ?? '';
             <tr>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo $r['id']; ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['sala_nome']); ?></div></td>
-              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['data_especifica'] ?: '-') . ' ' . htmlspecialchars($r['hora_inicio']) . '-' . htmlspecialchars($r['hora_fim']); ?></div></td>
+              <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars(formatDateValue($r['data_especifica'])) . ' ' . htmlspecialchars($r['hora_inicio']) . '-' . htmlspecialchars($r['hora_fim']); ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2"><div class="box"><?php echo htmlspecialchars($r['requester_nr'] ?? $r['requester_id']); ?></div></td>
               <td style="padding:8px;border-bottom:1px solid #f2f2f2">
                 <div class="action-cell">

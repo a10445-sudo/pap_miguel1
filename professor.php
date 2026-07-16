@@ -21,6 +21,19 @@ function formatOrderStatus($status) {
     return $labels[$status] ?? htmlspecialchars($status);
 }
 
+function formatDateValue($value) {
+    if (empty($value)) {
+        return '-';
+    }
+
+    try {
+        $date = new DateTime($value);
+        return $date->format('d/m/Y');
+    } catch (Exception $e) {
+        return htmlspecialchars((string)$value);
+    }
+}
+
 // Handle request submission
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -81,7 +94,7 @@ $name = htmlspecialchars($_SESSION['user_name']);
       <div class="flash"><?php echo htmlspecialchars($msg); ?></div>
     <?php endif; ?>
 
-    <h2>Inventário</h2>
+    <h2>Catálogo de Produtos</h2>
     <?php if (count($products) === 0): ?>
       <p>O inventário está vazio.</p>
     <?php else: ?>
@@ -129,7 +142,7 @@ $name = htmlspecialchars($_SESSION['user_name']);
         <select name="horario_id" id="horario_id" required>
           <option value="">Selecionar</option>
           <?php foreach ($available_horarios as $ah): ?>
-            <option value="<?php echo $ah['horario_id']; ?>"><?php echo htmlspecialchars($ah['sala_nome']) . ' — ' . ($ah['data_especifica'] ? $ah['data_especifica'] : 'Sem data') . ' ' . $ah['hora_inicio'] . '-' . $ah['hora_fim']; ?></option>
+            <option value="<?php echo $ah['horario_id']; ?>"><?php echo htmlspecialchars($ah['sala_nome']) . ' — ' . ($ah['data_especifica'] ? formatDateValue($ah['data_especifica']) : 'Sem data') . ' ' . $ah['hora_inicio'] . '-' . $ah['hora_fim']; ?></option>
           <?php endforeach; ?>
         </select>
         <button type="submit">Pedir Sala</button>
@@ -174,7 +187,7 @@ $name = htmlspecialchars($_SESSION['user_name']);
                 —
               <?php endif; ?>
             </td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($o['created_at']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars(formatDateValue($o['created_at'])); ?></td>
           </tr>
         <?php endforeach; ?>
         </tbody>
@@ -198,9 +211,9 @@ $name = htmlspecialchars($_SESSION['user_name']);
         <?php foreach ($room_requests as $rr): ?>
           <tr>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['sala_nome']); ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['data_especifica'] ?: '-') . ' ' . htmlspecialchars($rr['hora_inicio']) . '-' . htmlspecialchars($rr['hora_fim']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars(formatDateValue($rr['data_especifica'])) . ' ' . htmlspecialchars($rr['hora_inicio']) . '-' . htmlspecialchars($rr['hora_fim']); ?></td>
             <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['status']); ?></td>
-            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars($rr['created_at']); ?></td>
+            <td style="padding:8px;border-bottom:1px solid #f2f2f2"><?php echo htmlspecialchars(formatDateValue($rr['created_at'])); ?></td>
           </tr>
         <?php endforeach; ?>
         </tbody>
